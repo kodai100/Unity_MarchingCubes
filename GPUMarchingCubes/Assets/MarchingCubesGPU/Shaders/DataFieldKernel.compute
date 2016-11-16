@@ -9,6 +9,7 @@ float3 _GridCenter;
 float3 _GridSize;
 float _Time;
 float _TimeScale;
+float _NoiseScale;
 
 
 [numthreads(8,8,8)]
@@ -18,11 +19,11 @@ void ClearDataFieldCS (uint3 id : SV_DispatchThreadID){
 
 [numthreads(32,1,1)]
 void UpdateDataFieldCS (uint3 id : SV_DispatchThreadID){
-	int idx = id.x;// +id.y * 8 + id.z * 64;
+	uint idx = id.x;// +id.y * 8 + id.z * 64;
 
-	int z = idx % _GridNum;
-	int y = (idx / _GridNum) % _GridNum;
-	int x = idx / (_GridNum * _GridNum);
+	uint z = (uint) idx % _GridNum;
+	uint y = (uint) (idx / _GridNum) % _GridNum;
+	uint x = (uint) idx / (_GridNum * _GridNum);
 
-	_DataFieldTexRW[uint3(x,y,z)] = snoise(float3(x + _Time * _TimeScale, y, z));
+	_DataFieldTexRW[uint3(x,y,z)] = snoise(float3(x + _Time * _TimeScale, y, z)/ (_GridNum * _NoiseScale));
 }

@@ -16,7 +16,8 @@ namespace irishoak{
         public Vector3 GridSize   = new Vector3(2.0f, 2.0f, 2.0f);
 
         private float _timeStep;
-        [Range(0,1)]public float timeScale = 0.4f;
+        [Range(0,10)]public float timeScale = 0.4f;
+        [Range(0, 10)] public float noiseScale = 0.4f;
 
         RenderTexture _dataFieldRenderTex;
 
@@ -33,18 +34,18 @@ namespace irishoak{
 
         #region MonoBehaviour Functions
         void Start(){
-            InitParams();   // 格子幅の決定(gridSize/numChunk)
+            InitParams();
             InitBuffers();  // コンピュートバッファとレンダーテクスチャ(3次元ボリュームデータ)の初期化
         }
 
         void Update(){
-            UdpateDataField();  // ボリュームデータのアップデート
+            UdpateDataField();
         }
 
         void OnRenderObject(){
             if (EnableDrawDebugVolumeTex){
                 if (VolumeTexDebugger != null){
-                    // ボリュームデータを送り、レンダリングする
+                    // ボリュームデータを送り、デバッグ用キューブをレンダリングする
                     VolumeTexDebugger.DrawVolumeTex(_dataFieldRenderTex, _dataFieldRenderTex.width, _dataFieldRenderTex.height, _dataFieldRenderTex.volumeDepth);
                 }
             }
@@ -55,7 +56,6 @@ namespace irishoak{
         }
 
         void OnDrawGizmos(){
-            // グリッド(シミュレーション領域)のギズモ
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(GridCenter, GridSize);
         }
@@ -63,13 +63,13 @@ namespace irishoak{
 
         #region Private Functions
         void InitParams(){
-            _cubeStep = new Vector3(GridSize.x / numChunks.x, GridSize.y / numChunks.y, GridSize.z / numChunks.z);    // 2.0 => gridsize
+            _cubeStep = new Vector3(GridSize.x / numChunks.x, GridSize.y / numChunks.y, GridSize.z / numChunks.z);    // 2.0 => gridsize marching cubes側ではサイズ2固定で計算しているので注意
             _timeStep = 0;
         }
 
         void InitBuffers(){
 
-            // 空間上のパーティクルの分布を示すボリュームデータの初期化(3次元レンダーテクスチャ)
+            // 3次元レンダーテクスチャ
             _dataFieldRenderTex = new RenderTexture((int)numChunks.x, (int)numChunks.y, 0, RenderTextureFormat.RFloat);
             _dataFieldRenderTex.dimension         = UnityEngine.Rendering.TextureDimension.Tex3D;
             _dataFieldRenderTex.filterMode        = FilterMode.Point;
@@ -82,7 +82,6 @@ namespace irishoak{
         }
 
         void DeleteBuffers(){
-
             if(_dataFieldRenderTex != null){
                 DestroyImmediate(_dataFieldRenderTex);
             }
@@ -104,6 +103,7 @@ namespace irishoak{
             DataFieldCS.SetVector("_GridSize",   GridSize  );
             DataFieldCS.SetFloat("_Time", _timeStep);
             DataFieldCS.SetFloat("_TimeScale", timeScale);
+            DataFieldCS.SetFloat("_NoiseScale", noiseScale);
             DataFieldCS.Dispatch(id, ParticleNum / 32, 1, 1);
         }
         #endregion

@@ -61,16 +61,14 @@ namespace irishoak{
             _vertDecals[5] = new Vector4(_cubeStep.x, 0.0f, _cubeStep.z, 0.0f);
             _vertDecals[6] = new Vector4(_cubeStep.x, _cubeStep.y, _cubeStep.z, 0.0f);
             _vertDecals[7] = new Vector4(0.0f, _cubeStep.y, _cubeStep.z, 0.0f);
-
-            // --- vertex buffer ---
-            // 球内に収めて初期化。
-            // 今後のVertexBufferのUpdateはParticleSystemGPU内で行われ、随時このスクリプトのOnRenderObject()関数から参照、ディスパッチする。
+            
+            // vertex buffer
             SimpleVertex[] vertexArr = new SimpleVertex[(int)_numChunks.x * (int)_numChunks.y * (int)_numChunks.z];
             int ii = 0;
             for (var k = -1.0f; k < 1.0f; k += _cubeStep.z){
                 for (var j = -1.0f; j < 1.0f; j += _cubeStep.y){
                     for (var i = -1.0f; i < 1.0f; i += _cubeStep.x){
-                        vertexArr[ii] = new SimpleVertex(new Vector3(i, j, k), new Color(i / _numChunks.x, j / _numChunks.y, k / _numChunks.z, 1.0f));
+                        vertexArr[ii] = new SimpleVertex(new Vector3(i, j, k), new Color(i / _numChunks.x, j / _numChunks.y, k / _numChunks.z, 1.0f));  // Colorは座標を意味する
                         ii++;
                     }
                 }
@@ -111,11 +109,11 @@ namespace irishoak{
 
         void Render(){
             RenderMat.SetPass(0);
-            RenderMat.SetBuffer ("_VertexBuffer",    _vertexBuffer);
-            RenderMat.SetBuffer ("_TriTableBuffer",  _triTableBuffer);
-            RenderMat.SetBuffer ("_EdgeTableBuffer", _edgeTableBuffer);
-            RenderMat.SetTexture("_DataFieldTex", volumeSupplyer.GetDataFieldTex ());
-            RenderMat.SetVectorArray("_VertDecals", _vertDecals);
+            RenderMat.SetBuffer ("_VertexBuffer",    _vertexBuffer);    // 格子点
+            RenderMat.SetBuffer ("_TriTableBuffer",  _triTableBuffer);  // ポリゴン情報テーブル
+            RenderMat.SetBuffer ("_EdgeTableBuffer", _edgeTableBuffer); // エッジ情報テーブル
+            RenderMat.SetTexture("_DataFieldTex", volumeSupplyer.GetDataFieldTex ());   // ボリュームデータ
+            RenderMat.SetVectorArray("_VertDecals", _vertDecals);   // 立方体格子点の各インデックスの相対位置
             RenderMat.SetVector ("_LightPos", LightPos);
             RenderMat.SetFloat  ("_IsoLevel", IsoLevel);
 
