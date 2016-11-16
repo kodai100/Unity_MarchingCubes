@@ -16,8 +16,8 @@ namespace irishoak{
         public Vector3 GridSize   = new Vector3(2.0f, 2.0f, 2.0f);
 
         private float _timeStep;
-        [Range(0,10)]public float timeScale = 0.4f;
-        [Range(0, 10)] public float noiseScale = 0.4f;
+        public float timeScale = 0.4f;
+        public float noiseScale = 0.4f;
 
         RenderTexture _dataFieldRenderTex;
 

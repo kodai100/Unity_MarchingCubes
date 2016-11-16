@@ -1,0 +1,36 @@
+﻿#pragma kernel ClearDataFieldCS
+#pragma kernel UpdateDataFieldCS
+
+#include "./SimplexNoise2D.cginc"
+
+RWTexture3D<float> _DataFieldTexRW;
+int3   _GridNum;
+float3 _GridCenter;
+float3 _GridSize;
+float _Time;
+float _TimeScale;
+float _NoiseScale;
+
+
+[numthreads(8, 8, 8)]
+void ClearDataFieldCS(uint3 id : SV_DispatchThreadID) {
+	_DataFieldTexRW[id] = 0.0;
+}
+
+[numthreads(32, 1, 1)]
+void UpdateDataFieldCS(uint3 id : SV_DispatchThreadID) {
+	uint idx = id.x;// +id.y * 8 + id.z * 64;
+
+	uint z = (uint) idx % _GridNum;
+	uint x = (uint) idx / (_GridNum * _GridNum);
+
+	float height = snoise(float2(x * _NoiseScale + _Time, z * _NoiseScale)) * 20;
+	uint y = (uint) (idx / _GridNum) % _GridNum;
+	
+	if (y < (height + _TimeScale)) {
+		_DataFieldTexRW[uint3(x, y, z)] = 1.0;
+	} else {
+		_DataFieldTexRW[uint3(x, y, z)] = 0.0;
+	}
+	
+}
